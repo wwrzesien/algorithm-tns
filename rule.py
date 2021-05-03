@@ -45,3 +45,68 @@ class Rule(object):
         """Return relative support (percentage)"""
         return self.transaction_count / sequence_count
         
+    def to_string(self):
+        """Get a string representation of the rule"""
+        line = ""
+        for idx, item in enumerate(self.itemset1):
+            line += "{}".format(item)
+            if idx != len(self.itemset1)-1:
+                line += ","
+        line += " ==> "
+        for idx, item in enumerate(self.itemset2):
+            line += "{}".format(item)
+            if idx != len(self.itemset2)-1:
+                line += ","
+        return line
+
+    def compare(self, o):
+        """Compare rules, 0 if equal, 0< if smaller, >0 if larger"""
+        if o is self:
+            return 0
+
+        compare = self.transaction_count - o.transaction_count
+        if compare != 0:
+            return compare
+
+        itemset1_sizeA = 0 if self.itemset1 == None else len(self.itemset1)
+        itemset1_sizeB = 0 if o.itemset1 == None else len(o.itemset1)
+        compare2 = itemset1_sizeA - itemset1_sizeB
+        if compare2 != 0:
+            return compare2
+
+        itemset2_sizeA = 0 if self.itemset2 == None else len(self.itemset2)
+        itemset2_sizeB = 0 if o.itemset2 == None else len(o.itemset2)
+        compare3 = itemset2_sizeA - itemset2_sizeB
+        if compare3 != 0:
+            return compare3
+        
+        compare4 = self.confidence - o.confidence
+        if compare4 != 0:
+            return compare4
+        
+        return 0
+
+    def equals(self, o):
+        """Check if rule is equal to another (if they have the same items in their antecedent and consequent)"""
+        if len(o.itemset1) != len(self.itemset1):
+            return False
+        if len(o.itemset2) != len(self.itemset2):
+            return False
+        
+        for idx, item in enumerate(self.itemset1):
+            if item != o.itemset1[idx]:
+                return False
+        for idx, item in enumerate(self.itemset2):
+            if item != o.itemset2[idx]:
+                return False
+
+        return True
+        
+
+
+if __name__ == "__main__":
+    rule = Rule()
+    rule.rule([1,2],[3], None, None, None, None, None, None, None)
+
+    print(rule.to_string())
+    print(rule.compare(rule))

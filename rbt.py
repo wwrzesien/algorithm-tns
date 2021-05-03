@@ -25,7 +25,11 @@ class RedBlackTree(Rule):
         self.root = self.TNULL
 
         # Number of elements currently in the tree
-        self.size = 0   
+        self.size = 0
+    
+    def is_empty(self):
+        """Check whether tree is empty"""
+        return self.root == self.TNULL
 
     def left_rotate(self, x):
         """Perform a left rotate of a sub-tree"""
@@ -74,7 +78,7 @@ class RedBlackTree(Rule):
 
         while x != self.TNULL:
             y = x
-            if node.item < x.item:
+            if node.item.compare(x.item) < 0:
                 x = x.left
             else:
                 x = x.right
@@ -82,7 +86,7 @@ class RedBlackTree(Rule):
         node.parent = y
         if y == None:
             self.root = node
-        elif node.item < y.item:
+        elif node.item.compare(y.item) < 0:
             y.left = node
         else:
             y.right = node
@@ -275,23 +279,20 @@ class RedBlackTree(Rule):
             y = y.parent
         return y
 
-    def search(self, node, key):
+    def search(self, node, k):
         """Search for element and return the node that contains this element"""
-        z = self.TNULL
         while node != self.TNULL:
-            if node.item == key:
-                z = node
-            if node.item <= key:
+            if k.compare(node.item) < 0:
                 node = node.right
             else:
                 node = node.left
         return node
 
-    def lower_node(self, key):
+    def lower_node(self, k):
         """Return the node having the largest element having a value lower than a given element k"""
         x = self.root
         while x != self.TNULL:
-            if k.item > x.item:
+            if k.compare(x.item) > 0:
                 if x.right != self.TNULL:
                     x = x.right
                 else:
@@ -304,13 +305,13 @@ class RedBlackTree(Rule):
                     while current.parent != self.TNULL and current.parent.left == current:
                         current = current.parent
                     return current.parent
-        return self.TNULL
+        return None
 
     def higher_node(sefl, k):
         """Return the node having the largest element having a value higher than a given element k"""
         x = self.root
         while x != self.TNULL:
-            if k.item < x.item:
+            if k.compare(x.item) < 0:
                 if x.left != self.TNULL:
                     x = x.left
                 else:
@@ -323,7 +324,7 @@ class RedBlackTree(Rule):
                     while current.parent != self.TNULL and current.parent.right == current:
                         current = current.parent
                     return current.parent
-        return self.TNULL
+        return None
 
     def pop_minimum(self):
         """Return and remove the minimum element in the tree"""
@@ -349,11 +350,20 @@ class RedBlackTree(Rule):
 if __name__ == "__main__":
     bst = RedBlackTree()
 
+    print(bst.is_empty())
+
     bst.add(55)
+
+    print(bst.is_empty())
     bst.add(10)
 
-    x = bst.minimum()
-    print(x.item)
+    x = bst.pop_minimum()
+    print(x)
+    y = bst.pop_minimum()
+    print(y)
+
+    print(bst.is_empty())
+    # print(x.item)
 
 
         
