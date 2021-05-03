@@ -4,6 +4,7 @@ https://www.programiz.com/dsa/red-black-tree
 """
 
 import sys
+from rule import Rule
 
 
 class Node(object):
@@ -13,10 +14,10 @@ class Node(object):
         self.left = None
         self.right = None
         self.color = 1
-
-
-class RedBlackTree(object):
+        
+class RedBlackTree(Rule):
     def __init__(self, *args):
+        super(Rule, self).__init__(*args)
         self.TNULL = Node(0)
         self.TNULL.color = 0
         self.TNULL.left = None
@@ -26,7 +27,7 @@ class RedBlackTree(object):
         # Number of elements currently in the tree
         self.size = 0   
 
-    def left_rotate(self, Node: x):
+    def left_rotate(self, x):
         """Perform a left rotate of a sub-tree"""
         y = x.right
         x.right = y.left
@@ -43,7 +44,7 @@ class RedBlackTree(object):
         y.left = x
         x.parent = y
 
-    def right_rotate(self, Node: x):
+    def right_rotate(self, x):
         """Perform a right rotate of a sub-tree"""
         y = x.left
         x.left = y.right
@@ -93,9 +94,10 @@ class RedBlackTree(object):
         if node.parent.parent == None:
             return 
 
+        self.size += 1
         self.fix_insert(node)
 
-    def fix_insert(self, Node: k):
+    def fix_insert(self, k):
         """Balance the tree after insertion"""
         while k.parent.color == 1:
             if k.parent == k.parent.parent.right:
@@ -147,6 +149,10 @@ class RedBlackTree(object):
         if z == self.TNULL:
             return
         
+        self.perform_remove(z)
+    
+    def perform_remove(self, z):
+        """Perform removal of an element"""
         y = z 
         y_orinal_color = y.color
         if z.left == self.TNULL:
@@ -170,20 +176,30 @@ class RedBlackTree(object):
             y.left = z.left
             y.left.parent = y
             y.color = z.color
-        if y_orinal_color == 0
+        if y_orinal_color == 0:
             self.delete_fix(x)
         self.size -= 1
 
-    def mininum(self, node):
+    def minimum(self, node=None):
         """Return node with minimum value"""
+        if node == None:
+            node = self.root
         while node.left != self.TNULL:
             node = node.left
+
+        if node == None:
+            return node.item
         return node
 
-    def maximum(self, node):
+    def maximum(self, node=None):
         """Return node with maximum value"""
+        if node == None:
+            node = self.root
         while node.right != self.TNULL:
             node = node.right
+        
+        if node == None:
+            return node.item
         return node
 
     def delete_fix(self, x):
@@ -259,7 +275,7 @@ class RedBlackTree(object):
             y = y.parent
         return y
 
-    def search(self, Node: node, key):
+    def search(self, node, key):
         """Search for element and return the node that contains this element"""
         z = self.TNULL
         while node != self.TNULL:
@@ -271,26 +287,73 @@ class RedBlackTree(object):
                 node = node.left
         return node
 
-
-
     def lower_node(self, key):
         """Return the node having the largest element having a value lower than a given element k"""
-        pass
+        x = self.root
+        while x != self.TNULL:
+            if k.item > x.item:
+                if x.right != self.TNULL:
+                    x = x.right
+                else:
+                    return x
+            else:
+                if x.left != self.TNULL:
+                    x = x.left
+                else:
+                    current = x
+                    while current.parent != self.TNULL and current.parent.left == current:
+                        current = current.parent
+                    return current.parent
+        return self.TNULL
 
     def higher_node(sefl, k):
         """Return the node having the largest element having a value higher than a given element k"""
-        pass
+        x = self.root
+        while x != self.TNULL:
+            if k.item < x.item:
+                if x.left != self.TNULL:
+                    x = x.left
+                else:
+                    return x
+            else:
+                if x.right != self.TNULL:
+                    x = x.right
+                else:
+                    current = x
+                    while current.parent != self.TNULL and current.parent.right == current:
+                        current = current.parent
+                    return current.parent
+        return self.TNULL
 
     def pop_minimum(self):
         """Return and remove the minimum element in the tree"""
-        pass
+        x = self.root
+        while x.left != self.TNULL:
+            x = x.left
+        v = x.item
+        self.perform_remove(x)
+        return v
 
     def pop_maximum(self):
         """Return and remove the maximum element in the tree"""
-        pass
+        x = self.root
+        while x.right != self.TNULL:
+            x = x.right
+        v = x.item
+        self.perform_remove(x)
+        return v
 
 
 
+
+if __name__ == "__main__":
+    bst = RedBlackTree()
+
+    bst.add(55)
+    bst.add(10)
+
+    x = bst.minimum()
+    print(x.item)
 
 
         
