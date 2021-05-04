@@ -3,7 +3,6 @@ Implementation of Red-Black Tree
 https://www.programiz.com/dsa/red-black-tree
 """
 
-import sys
 from rule import Rule
 
 
@@ -18,7 +17,7 @@ class Node(object):
 class RedBlackTree(Rule):
     def __init__(self, *args):
         super(Rule, self).__init__(*args)
-        self.TNULL = Node(0)
+        self.TNULL = Node(None)
         self.TNULL.color = 0
         self.TNULL.left = None
         self.TNULL.right = None
@@ -68,12 +67,12 @@ class RedBlackTree(Rule):
     def add(self, key):
         """Add an element to the tree"""
         node = Node(key)
-        node.parent = None
+        # node.parent = None
         node.left = self.TNULL
         node.right = self.TNULL
         node.color = 1
 
-        y = None
+        y = self.TNULL
         x = self.root
 
         while x != self.TNULL:
@@ -84,19 +83,19 @@ class RedBlackTree(Rule):
                 x = x.right
         
         node.parent = y
-        if y == None:
+        if y == self.TNULL:
             self.root = node
         elif node.item.compare(y.item) < 0:
             y.left = node
         else:
             y.right = node
 
-        if node.parent == None:
-            node.color = 0
-            return 
+        # if node.parent == None:
+        #     node.color = 0
+        #     return 
         
-        if node.parent.parent == None:
-            return 
+        # if node.parent.parent == None:
+        #     return 
 
         self.size += 1
         self.fix_insert(node)
@@ -104,7 +103,21 @@ class RedBlackTree(Rule):
     def fix_insert(self, k):
         """Balance the tree after insertion"""
         while k.parent.color == 1:
-            if k.parent == k.parent.parent.right:
+            if k.parent.equals(k.parent.parent.left):
+                u = k.parent.parent.right
+                if u.color == 1:
+                    u.color = 0
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    k = k.parent.parent
+                else:
+                    if k.equals(k.parent.right):
+                        k = k.parent
+                        self.left_rotate(k)
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.right_rotate(k.parent.parent)
+            else:
                 u = k.parent.parent.left
                 if u.color == 1:
                     u.color = 0
@@ -112,34 +125,19 @@ class RedBlackTree(Rule):
                     k.parent.parent.color = 1
                     k = k.parent.parent
                 else:
-                    if k == k.parent.left:
+                    if k.equals(k.parent.right):
                         k = k.parent
                         self.right_rotate(k)
                     k.parent.color = 0
                     k.parent.parent.color = 1
-                    self.left_rotate(k.parent.parent)
-            else:
-                u = k.parent.parent.right
-
-                if u.color == 1:
-                    u.color = 0
-                    k.parent.color = 0
-                    k.parent.parent.color = 1
-                    k = k.parent.parent
-                else:
-                    if k == k.parent.right:
-                        k = k.parent
-                        self.left_rotate(k)
-                    k.parent.color = 0
-                    k.parent.parent.color = 1
                     self.right_rotate(k.parent.parent)
-            if k == self.root:
-                break
+            # if k == self.root:
+            #     break
         self.root.color = 0
 
     def transplant(self, u, v):
         """Transplant a subtree"""
-        if u.parent == None:
+        if u.parent == self.TNULL:
             self.root = v
         elif u == u.parent.left:
             u.parent.left = v
@@ -169,7 +167,7 @@ class RedBlackTree(Rule):
             y = self.mininum(z.right)
             y_orinal_color = y.color
             x = y.right
-            if y.parent == z:
+            if y.parent.equals(z):
                 x.parent = y
             else:
                 self.transplant(y, y.right)
@@ -188,10 +186,11 @@ class RedBlackTree(Rule):
         """Return node with minimum value"""
         if node == None:
             node = self.root
+            flag = 1
         while node.left != self.TNULL:
             node = node.left
 
-        if node == None:
+        if flag:
             return node.item
         return node
 
@@ -199,17 +198,18 @@ class RedBlackTree(Rule):
         """Return node with maximum value"""
         if node == None:
             node = self.root
+            flag = 1
         while node.right != self.TNULL:
             node = node.right
         
-        if node == None:
+        if flag:
             return node.item
         return node
 
     def delete_fix(self, x):
         """Balancing the tree after deletion"""
         while x != self.root and x.color == 0:
-            if x == x.parent.left:
+            if x.equals(x.parent.left):
                 s = x.parent.right
                 if s.color == 1:
                     s.color = 0
@@ -240,7 +240,7 @@ class RedBlackTree(Rule):
                     self.right_rotate(x.parent)
                     s = x.parent.left
 
-                if s.right.color == 0 and s.right.color == 0:
+                if s.right.color == 0 and s.left.color == 0:
                     s.color = 1
                     x = x.parent
                 else:
@@ -263,7 +263,7 @@ class RedBlackTree(Rule):
             return self.minimum(x.right)
         
         y = x.parent
-        while y != self.TNULL and x == y.right:
+        while y != self.TNULL and x.equals(y.right):
             x = y
             y = y.parent
         return y
@@ -274,7 +274,7 @@ class RedBlackTree(Rule):
             return self.minimum(x.left)
 
         y = x.parent
-        while y != self.TNULL and x == y.left:
+        while y != self.TNULL and x.equals(y.left):
             x = y 
             y = y.parent
         return y
@@ -328,6 +328,8 @@ class RedBlackTree(Rule):
 
     def pop_minimum(self):
         """Return and remove the minimum element in the tree"""
+        if self.root == self.TNULL:
+            return None
         x = self.root
         while x.left != self.TNULL:
             x = x.left
@@ -337,6 +339,8 @@ class RedBlackTree(Rule):
 
     def pop_maximum(self):
         """Return and remove the maximum element in the tree"""
+        if self.root == self.TNULL:
+            return None
         x = self.root
         while x.right != self.TNULL:
             x = x.right
@@ -344,7 +348,11 @@ class RedBlackTree(Rule):
         self.perform_remove(x)
         return v
 
-
+    def pre_order(self, node):
+        if node != self.TNULL:
+            node.item.print_stats()
+            self.pre_order(node.left)
+            self.pre_order(node.right)
 
 
 if __name__ == "__main__":
@@ -352,17 +360,38 @@ if __name__ == "__main__":
 
     print(bst.is_empty())
 
-    bst.add(55)
+    rule1 = Rule()
+    rule1.rule([1], [2], 4, 6, "w", "w", "d", "v", 7)
+    rule2 = Rule()
+    rule2.rule([3], [2, 6], 6, 8, None, None, None, None, 8)
+    # bst.add(rule1)
+    bst.add(rule2)
 
     print(bst.is_empty())
-    bst.add(10)
+    print(bst.root.item.print_stats())
+    # print(bst.root.parent)
+    # print(bst.root.left.item)
+    # print(bst.minimum().print_stats())
+    # print(bst.maximum().print_stats())
 
-    x = bst.pop_minimum()
-    print(x)
-    y = bst.pop_minimum()
-    print(y)
+    # x = bst.pop_maximum()
+    # print(x)
+    # print(x.confidence)
+    # print(rule2)
+    # bst.pre_order(bst.root)
 
-    print(bst.is_empty())
+    d = bst.lower_node(rule2)
+    print(d.item.print_stats())
+
+    # print(bst.is_empty())
+    # bst.add(10)
+
+    # x = bst.pop_minimum()
+    # print(x)
+    # y = bst.pop_minimum()
+    # print(y)
+
+    # print(bst.is_empty())
     # print(x.item)
 
 

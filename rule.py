@@ -3,6 +3,12 @@ Sequential rule as a output by the TNS algorithm
 https://www.philippe-fournier-viger.com/spmf/TopKNonRedundantSequentialRules.php
 """
 
+import logging
+
+log = logging.getLogger("tns")
+log.setLevel(logging.DEBUG)
+log.propagate = False
+
 class Rule(object):
     def __init__(self, *args):
         # antecedent
@@ -59,6 +65,10 @@ class Rule(object):
                 line += ","
         return line
 
+    def print_stats(self):
+        string = "{} #SUP: {} #CONF: {}".format(self.to_string(), self.get_absolute_support(), self.confidence)
+        log.info(string)
+
     def compare(self, o):
         """Compare rules, 0 if equal, 0< if smaller, >0 if larger"""
         if o is self:
@@ -106,7 +116,7 @@ class Rule(object):
 
 if __name__ == "__main__":
     rule = Rule()
-    rule.rule([1,2],[3], None, None, None, None, None, None, None)
+    rule.rule([1,2],[3],3, None, None, None, None, None, None)
 
     print(rule.to_string())
     print(rule.compare(rule))

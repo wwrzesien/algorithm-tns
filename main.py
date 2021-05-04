@@ -43,8 +43,16 @@ if __name__ == "__main__":
 
     log.debug(TEST_DB)
 
-    tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=TEST_DB)
+    class Database(object):
+        def __init__(self, *args):
+            self.database = TEST_DB
+            self.min_item = 1
+            self.max_item = 7
+            
+    tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=Database())
 
     tns.run_algorithm()
+
+    tns.print_stats()
 
     
