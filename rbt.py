@@ -67,12 +67,13 @@ class RedBlackTree(Rule):
     def add(self, key):
         """Add an element to the tree"""
         node = Node(key)
+        node.item = key
         # node.parent = None
         node.left = self.TNULL
         node.right = self.TNULL
         node.color = 1
-
-        y = self.TNULL
+        # y = self.TNULL
+        y = None
         x = self.root
 
         while x != self.TNULL:
@@ -83,27 +84,34 @@ class RedBlackTree(Rule):
                 x = x.right
         
         node.parent = y
-        if y == self.TNULL:
+        # if y == self.TNULL:
+        if y == None:
+            node.color = 0
             self.root = node
         elif node.item.compare(y.item) < 0:
             y.left = node
         else:
             y.right = node
 
-        # if node.parent == None:
-        #     node.color = 0
-        #     return 
-        
-        # if node.parent.parent == None:
-        #     return 
-
         self.size += 1
+
+        if node.parent == None:
+            node.color = 0
+            return 
+        
+        if node.parent.parent == None:
+            return 
+        
+        
         self.fix_insert(node)
 
     def fix_insert(self, k):
         """Balance the tree after insertion"""
+        print('node.parent z rule')
+        print(type(k.parent))
         while k.parent.color == 1:
-            if k.parent.equals(k.parent.parent.left):
+            # if k.parent.item.equals(k.parent.parent.left.item):
+            if k.parent == k.parent.parent.left:
                 u = k.parent.parent.right
                 if u.color == 1:
                     u.color = 0
@@ -111,7 +119,8 @@ class RedBlackTree(Rule):
                     k.parent.parent.color = 1
                     k = k.parent.parent
                 else:
-                    if k.equals(k.parent.right):
+                    # if k.parent.right is not None and k.item.equals(k.parent.right.item):
+                    if k == k.parent.right:
                         k = k.parent
                         self.left_rotate(k)
                     k.parent.color = 0
@@ -125,19 +134,21 @@ class RedBlackTree(Rule):
                     k.parent.parent.color = 1
                     k = k.parent.parent
                 else:
-                    if k.equals(k.parent.right):
+                    # if k.item.equals(k.parent.right.item):
+                    if k == k.parent.left:
                         k = k.parent
                         self.right_rotate(k)
                     k.parent.color = 0
                     k.parent.parent.color = 1
-                    self.right_rotate(k.parent.parent)
-            # if k == self.root:
-            #     break
+                    self.left_rotate(k.parent.parent)
+            if k == self.root:
+                break
         self.root.color = 0
 
     def transplant(self, u, v):
         """Transplant a subtree"""
-        if u.parent == self.TNULL:
+        # if u.parent == self.TNULL:
+        if u.parent == None:
             self.root = v
         elif u == u.parent.left:
             u.parent.left = v
@@ -167,7 +178,8 @@ class RedBlackTree(Rule):
             y = self.mininum(z.right)
             y_orinal_color = y.color
             x = y.right
-            if y.parent.equals(z):
+            # if y.parent.equals(z):
+            if y.parent == z:
                 x.parent = y
             else:
                 self.transplant(y, y.right)
@@ -209,7 +221,8 @@ class RedBlackTree(Rule):
     def delete_fix(self, x):
         """Balancing the tree after deletion"""
         while x != self.root and x.color == 0:
-            if x.equals(x.parent.left):
+            # if x.equals(x.parent.left):
+            if x == x.parent.left:
                 s = x.parent.right
                 if s.color == 1:
                     s.color = 0
@@ -263,7 +276,8 @@ class RedBlackTree(Rule):
             return self.minimum(x.right)
         
         y = x.parent
-        while y != self.TNULL and x.equals(y.right):
+        # while y != self.TNULL and x.equals(y.right):
+        while y != self.TNULL and x == y.right:
             x = y
             y = y.parent
         return y
@@ -274,7 +288,8 @@ class RedBlackTree(Rule):
             return self.minimum(x.left)
 
         y = x.parent
-        while y != self.TNULL and x.equals(y.left):
+        # while y != self.TNULL and x.equals(y.left):
+        while y != self.TNULL and x == y.left:
             x = y 
             y = y.parent
         return y
@@ -291,6 +306,7 @@ class RedBlackTree(Rule):
     def lower_node(self, k):
         """Return the node having the largest element having a value lower than a given element k"""
         x = self.root
+        print(self.root.item)
         while x != self.TNULL:
             if k.compare(x.item) > 0:
                 if x.right != self.TNULL:
@@ -302,12 +318,12 @@ class RedBlackTree(Rule):
                     x = x.left
                 else:
                     current = x
-                    while current.parent != self.TNULL and current.parent.left == current:
+                    while current.parent != None and current.parent.left == current:
                         current = current.parent
                     return current.parent
         return None
 
-    def higher_node(sefl, k):
+    def higher_node(self, k):
         """Return the node having the largest element having a value higher than a given element k"""
         x = self.root
         while x != self.TNULL:
@@ -364,11 +380,16 @@ if __name__ == "__main__":
     rule1.rule([1], [2], 4, 6, "w", "w", "d", "v", 7)
     rule2 = Rule()
     rule2.rule([3], [2, 6], 6, 8, None, None, None, None, 8)
+    rule3 = Rule()
+    rule3.rule([3], [2, 6], 6, 8, None, None, None, None, 8)
     # bst.add(rule1)
     bst.add(rule2)
+    bst.add(rule3)
+    # bst.add(rule2)
 
     print(bst.is_empty())
-    print(bst.root.item.print_stats())
+    bst.pre_order(bst.root)
+    # print(bst.root.item.print_stats())
     # print(bst.root.parent)
     # print(bst.root.left.item)
     # print(bst.minimum().print_stats())
@@ -380,8 +401,8 @@ if __name__ == "__main__":
     # print(rule2)
     # bst.pre_order(bst.root)
 
-    d = bst.lower_node(rule2)
-    print(d.item.print_stats())
+    # d = bst.lower_node(rule2)
+    # print(d.item.print_stats())
 
     # print(bst.is_empty())
     # bst.add(10)

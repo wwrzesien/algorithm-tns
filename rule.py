@@ -67,7 +67,8 @@ class Rule(object):
 
     def print_stats(self):
         string = "{} #SUP: {} #CONF: {}".format(self.to_string(), self.get_absolute_support(), self.confidence)
-        log.info(string)
+        # log.info(string)
+        print(string)
 
     def compare(self, o):
         """Compare rules, 0 if equal, 0< if smaller, >0 if larger"""
@@ -98,6 +99,8 @@ class Rule(object):
 
     def equals(self, o):
         """Check if rule is equal to another (if they have the same items in their antecedent and consequent)"""
+        if o is None:
+            return False
         if len(o.itemset1) != len(self.itemset1):
             return False
         if len(o.itemset2) != len(self.itemset2):

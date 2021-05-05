@@ -259,11 +259,14 @@ class ALgorithmTNS(object):
         tmp_node.rule(None, None, 0, support+1, None, None, None, None, None)
         lower_rule_node = self.k_rules.lower_node(tmp_node)
 
-
+        print("info o drzewie")
+        if self.k_rules.size > 0:
+            self.k_rules.pre_order(self.k_rules.root)
         # print(type(lower_rule_node))
         # print(lower_rule_node is None)
-        if lower_rule_node is not None and lower_rule_node.item is not None:
-            print(lower_rule_node.item.print_stats())
+        # if lower_rule_node is not None and lower_rule_node.item is not None:
+        #     print(lower_rule_node)
+        #     print(lower_rule_node.item.print_stats())
 
         # applying strategy 1 and strategy 2
         rules_to_delete = set()
@@ -274,8 +277,8 @@ class ALgorithmTNS(object):
             # Strategy 1:
             # if the confidence is the same and the rule "lower_rule_node" subsume the new rule
             # then we dont add the new rule
-            print(rule.confidence)
-            print(lower_rule_node.item.confidence)
+            # print(rule.confidence)
+            # print(lower_rule_node.item.confidence)
             # print(self.subsume(lower_rule_node.item, rule))
             if rule.confidence == lower_rule_node.item.confidence and self.subsume(lower_rule_node.item, rule):
                 self.not_added += 1
@@ -290,8 +293,8 @@ class ALgorithmTNS(object):
                 self.total_removed_count += 1
             
             # check the next rule
-            self.lower_rule_node = self.k_rules.lower_node(lower_rule_node.item)
-            print(lower_rule_node.item.print_stats())
+            lower_rule_node = self.k_rules.lower_node(lower_rule_node.item)
+            # print(lower_rule_node.item.print_stats())
         
         # delete rules to be deleted
         for r in rules_to_delete:
@@ -299,6 +302,8 @@ class ALgorithmTNS(object):
         
         # now the rule has passed the test of Straategy 1 already
         # so we add it to the set of top k rules
+        # print("dodajemy rule")
+        # print(rule.print_stats())
         self.k_rules.add(rule)
         # if there is more than k rules
         if self.k_rules.size > self.k:
@@ -324,17 +329,11 @@ class ALgorithmTNS(object):
     def subsume(self, rule1, rule2):
         """Check id rule is subsumed by another"""
         # we check first the size of the itemset
-        print(rule1.itemset1)
-        print(rule1.itemset2)
-        print(rule2.itemset1)
-        print(rule2.itemset2)
         if len(rule1.itemset1) <= len(rule2.itemset2) and len(rule1.itemset1) >= len(rule2.itemset2):
             # after that we check the inclusion relationships between the iemsets
             cond1 = self.contains_or_equals(rule2.itemset1, rule1.itemset1)
             cond2 = self.contains_or_equals(rule1.itemset2, rule2.itemset2)
             # if all the conditions are met, the method returns true
-            print(cond1)
-            print(cond2)
             return cond1 and cond2 
         return False
 
