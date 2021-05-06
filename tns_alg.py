@@ -40,7 +40,7 @@ class ALgorithmTNS(object):
         self.total_removed_count = 0
         self.not_added = 0
 
-        log.info("run_algorithm")
+        log.info("Run algorithm")
 
         # set minsup = 1 (will be increased by the algorithm progressively)
         self.min_supp_relative = 1
@@ -48,15 +48,15 @@ class ALgorithmTNS(object):
         # scan the database to count the occurrence of each item
         self.scan_database()
 
-        print(self.item_count_first)
-        print(self.item_count_last)
+        # print(self.item_count_first)
+        # print(self.item_count_last)
         # print(self.k_rules.size)
 
         # start the algorithm
         self.start()
 
         # if too many rules, we remove the extra rules
-        # self.clean_result()
+        self.clean_result()
 
         return self.k_rules
 
@@ -74,7 +74,6 @@ class ALgorithmTNS(object):
                         self.item_count_last[item][tid] = j
                     else:
                         self.item_count_last[item][tid] = j
-
 
     def start(self):
         """Start the algorithm"""
@@ -233,8 +232,15 @@ class ALgorithmTNS(object):
         # Now we have finished checking all the rules containing 1 item
 	    # in the left side and 1 in the right side,
 	    # the next step is to recursively expand rules in the set 
-	    # "candidates" to find more rules.	
+	    # "candidates" to find more rules.
+        print('K-rules drzewo')
+        self.k_rules.pre_order(self.k_rules.root)
+        print("candidates drzewo")
+        self.candidates.pre_order(self.candidates.root)
         while not self.candidates.is_empty():
+            print(self.candidates.size)
+            print("candidates drzewo")
+            self.candidates.pre_order(self.candidates.root)
             #  take the rule with the highest support first
             rule = self.candidates.pop_maximum()
             if rule.get_absolute_support() < self.min_supp_relative:
@@ -259,9 +265,9 @@ class ALgorithmTNS(object):
         tmp_node.rule(None, None, 0, support+1, None, None, None, None, None)
         lower_rule_node = self.k_rules.lower_node(tmp_node)
 
-        print("info o drzewie")
-        if self.k_rules.size > 0:
-            self.k_rules.pre_order(self.k_rules.root)
+        # print("info o drzewie")
+        # if self.k_rules.size > 0:
+        #     self.k_rules.pre_order(self.k_rules.root)
         # print(type(lower_rule_node))
         # print(lower_rule_node is None)
         # if lower_rule_node is not None and lower_rule_node.item is not None:
@@ -315,7 +321,7 @@ class ALgorithmTNS(object):
                 tmp_rule.rule(None, None, 0, self.min_supp_relative+1, None, None, None, None, None)
                 
                 i = 0
-                while self.k_rules.size > k or i == 0:
+                while self.k_rules.size > self.k or i == 0:
                     i = 1
                     lower = self.k_rules.lower_node(tmp_rule)
                     if lower == None:
@@ -324,7 +330,7 @@ class ALgorithmTNS(object):
             
             # set the minimum support to the support of the rule having
             # the lowest support
-            self.min_supp_relative - self.k_rules.minimum().get_absolute_support()
+            self.min_supp_relative = self.k_rules.minimum().get_absolute_support()
 
     def subsume(self, rule1, rule2):
         """Check id rule is subsumed by another"""
@@ -390,7 +396,7 @@ class ALgorithmTNS(object):
         left = len(rule.tids_ij)
         for tid in rule.tids_ij:
             # get the sequence and accurances of J in that sequence
-            sequence = self.db[tid]
+            sequence = self.db.database[tid]
             end = rule.occurrences_j_last[tid]
 
             # for each itemset before the last occurence of J
@@ -420,7 +426,7 @@ class ALgorithmTNS(object):
                         
                         # otherwise, if we did not see "c" yet, create a new tidset for "c"
                         tids_item_c = set()
-                        frequnet_items_c[item] = tids_item_c
+                        frequnet_items_c[item_c] = tids_item_c
 
                         # add the current tid to the tidset of "c"
                         tids_item_c.add(tid)
@@ -428,7 +434,7 @@ class ALgorithmTNS(object):
                         tids_item_c = frequnet_items_c[item_c]
                         # if "c" was seen before but there is not enough sequences left to be scanned
                         # to allow IU{c} --> J to reach the minimum support threshold
-                        if len(tids_item_c) + left > self.min_supp_relative:
+                        if len(tids_item_c) + left < self.min_supp_relative:
                             tids_item_c.remove(item_c)
                             break # continue itemloop TODO
                         
@@ -451,10 +457,11 @@ class ALgorithmTNS(object):
                 conf_ic_j = len(tids_ic_j) / len(tids_ic)
                 itemset_ic = []
                 itemset_ic = rule.itemset1.copy()
+                itemset_ic.append(item_c)
 
                 # if the confidence is high enough then it is a valid rule 
                 candidate = Rule()
-                candidate.rule(itemset_ic, rule.itemset2, conf_ic_j, len(tids_ic_j), tids_ic, None, tids_ic_j, None, rule.occurrences_j_first)
+                candidate.rule(itemset_ic, rule.itemset2, conf_ic_j, len(tids_ic_j), tids_ic, None, tids_ic_j, None, rule.occurrences_j_last)
                 if conf_ic_j >= self.min_conf:
                     # save the rule
                     self.save(candidate, len(tids_ic_j))
@@ -483,7 +490,7 @@ class ALgorithmTNS(object):
 
         for tid in rule.tids_ij:
             # get the seuence and get first occurence of I in that sequence
-            sequence = self.db[tid]
+            sequence = self.db.database[tid]
             first = rule.occurrences_i_first[tid]
 
             # for each itemset after the first occurence of I in that sequence
@@ -510,16 +517,16 @@ class ALgorithmTNS(object):
                         # add the current tid to the tidset of "c"
                         tids_item_c.add(tid)
                     else:
-                        tids_item_c = frequent_items_c[item]
+                        tids_item_c = frequent_items_c[item_c]
                         # if "c" was seen before but there is not enough sequences left to be scanned
                         # to allow I --> J U{c} to reach the minimum support threshold
                         # remove 'c' and continue the loop of items
-                        if len(tids_item_c) + left > self.min_supp_relative:
-                            tids_item_c.remove(item)
+                        if len(tids_item_c) + left < self.min_supp_relative:
+                            tids_item_c.remove(item_c)
                             break # continue itemloop TODO
                         
                         # add the current tid to the tidset of "c"
-                        tids_item.add(tid)
+                        tids_item_c.add(tid)
             left -= 1
         
         # for each item c found, we create a rule I ==> JU{c}
@@ -548,9 +555,10 @@ class ALgorithmTNS(object):
 
                 # Create rule I ==> JU{c} and calculate its confidence 
                 # defined as:  sup(I -->J U{c}) /  sup(I)
-                conf_i_jc = len(tids_i_jc) / len(tids_i)
+                conf_i_jc = len(tids_i_jc) / len(rule.tids_i)
                 itemset_jc = []
                 itemset_jc = rule.itemset2.copy()
+                itemset_jc.append(item_c)
 
                 # if the confidence is high enough then it is a valid rule 
                 candidate = Rule()

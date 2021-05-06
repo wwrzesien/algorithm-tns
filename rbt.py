@@ -107,8 +107,8 @@ class RedBlackTree(Rule):
 
     def fix_insert(self, k):
         """Balance the tree after insertion"""
-        print('node.parent z rule')
-        print(type(k.parent))
+        # print('node.parent z rule')
+        # print(type(k.parent))
         while k.parent.color == 1:
             # if k.parent.item.equals(k.parent.parent.left.item):
             if k.parent == k.parent.parent.left:
@@ -175,7 +175,7 @@ class RedBlackTree(Rule):
             x = z.left
             self.transplant(z, z.left)
         else:
-            y = self.mininum(z.right)
+            y = self.minimum(z.right)
             y_orinal_color = y.color
             x = y.right
             # if y.parent.equals(z):
@@ -196,6 +196,7 @@ class RedBlackTree(Rule):
 
     def minimum(self, node=None):
         """Return node with minimum value"""
+        flag = 0
         if node == None:
             node = self.root
             flag = 1
@@ -296,17 +297,17 @@ class RedBlackTree(Rule):
 
     def search(self, node, k):
         """Search for element and return the node that contains this element"""
-        while node != self.TNULL:
+        while node != self.TNULL and k != node.item:
             if k.compare(node.item) < 0:
-                node = node.right
-            else:
                 node = node.left
+            else:
+                node = node.right
         return node
 
     def lower_node(self, k):
         """Return the node having the largest element having a value lower than a given element k"""
         x = self.root
-        print(self.root.item)
+        # print(self.root.item)
         while x != self.TNULL:
             if k.compare(x.item) > 0:
                 if x.right != self.TNULL:
@@ -337,7 +338,7 @@ class RedBlackTree(Rule):
                     x = x.right
                 else:
                     current = x
-                    while current.parent != self.TNULL and current.parent.right == current:
+                    while current.parent != None and current.parent.right == current:
                         current = current.parent
                     return current.parent
         return None
