@@ -335,7 +335,7 @@ class ALgorithmTNS(object):
     def subsume(self, rule1, rule2):
         """Check id rule is subsumed by another"""
         # we check first the size of the itemset
-        if len(rule1.itemset1) <= len(rule2.itemset2) and len(rule1.itemset1) >= len(rule2.itemset2):
+        if len(rule1.itemset1) <= len(rule2.itemset1) and len(rule1.itemset2) >= len(rule2.itemset2):
             # after that we check the inclusion relationships between the iemsets
             cond1 = self.contains_or_equals(rule2.itemset1, rule1.itemset1)
             cond2 = self.contains_or_equals(rule1.itemset2, rule2.itemset2)
@@ -607,7 +607,18 @@ if __name__ == "__main__":
             
     tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=Database())
 
-    tns.run_algorithm()
+    # tns.run_algorithm()
+
+    class t():
+        def __init__(self, itemset1, itemset2):
+            self.itemset1 = itemset1
+            self.itemset2 = itemset2
+
+    a = t([1], [2,3,4])
+    b = t([1], [2,3,4,6])
+
+    print(tns.subsume(a, b))
+    print(tns.subsume(b, a))
 
     # print(tns.contains_or_equals([1,2,3], [2,3, 6]))
 

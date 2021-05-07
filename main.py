@@ -19,11 +19,6 @@ fh.setFormatter(formatter)
 log.addHandler(ch)
 log.addHandler(fh)
 
-# Twitter API credentials
-CONSUMER_KEY = ""
-CONSUMER_SECRET = ""
-
-
 # Seguence db -> list of sequences, 
 # Sequence -> list of itemsets
 # Itemset -> list of elements (integers/words)
@@ -33,6 +28,10 @@ TEST_DB = [
     ([5,6], [1,2], [4,6], [3], [2]),
     ([5], [7], [1,6], [3], [2], [3])
 ]
+# TEST_DB = [
+#     ([1], [1,2,3], [1,3], [4], [3,6]),
+#     ([1], [1,2,3], [1,3], [4], [3,6])
+# ]
 
 if __name__ == "__main__":
     log.info("Start TNS algorithm")
