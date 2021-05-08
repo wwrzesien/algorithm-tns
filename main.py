@@ -1,6 +1,7 @@
 import logging
 import tweepy
 from tns_alg import ALgorithmTNS
+from twitter import TwitterDatabase
 
 # Create logger
 log = logging.getLogger("tns")
@@ -40,15 +41,25 @@ if __name__ == "__main__":
     min_conf = 0.5
     delta = 2
 
-    log.debug(TEST_DB)
+    # log.debug(TEST_DB)
 
     class Database(object):
         def __init__(self, *args):
             self.database = TEST_DB
             self.min_item = 1
             self.max_item = 7
+    
+    twr = Database()
+
+    # twr = TwitterDatabase('covid', 100)
+    # twr.retrieve_tweets()
+    # twr.load_pickle("./data_words.pickle", twr.database_words)
+    # twr.mapping()
+    # twr.load_pickle("./data_int.pickle")
+    # print(twr.database)
+    # print(1 in twr.database)
             
-    tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=Database())
+    tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=twr)
 
     tns.run_algorithm()
 

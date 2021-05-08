@@ -389,7 +389,7 @@ class ALgorithmTNS(object):
         # the following map will be used to count the support of each item
         # c that could potentially extend the rule.
         # the map associated a set of tids (value) to an item (key).
-        frequnet_items_c = {}
+        frequent_items_c = {}
 
         # we scan the sequence where I-->J appear to search for items c that we could add.
     	# for each sequence containing I-->J
@@ -413,37 +413,38 @@ class ALgorithmTNS(object):
                         continue
                     
                     # otherwise, we get the tidset of 'c'
-                    # tids_item = frequnet_items_c[item]
+                    # tids_item = frequent_items_c[item]
 
                     # if this set is not null, which means that "c" was not seen yet
                     # when scanning the sequences from I==>J
-                    if item_c not in frequnet_items_c.keys():
+                    if item_c not in frequent_items_c.keys():
                         # if there is less tids left in the tidset of I-->J to be scanned than
                         # the minsup, we don't consider c anymore because  IU{c} --> J
                         # could not be frequent
                         if left < self.min_supp_relative:
                             break # continue itemloop TODO
-                        
-                        # otherwise, if we did not see "c" yet, create a new tidset for "c"
-                        tids_item_c = set()
-                        frequnet_items_c[item_c] = tids_item_c
-
-                        # add the current tid to the tidset of "c"
-                        tids_item_c.add(tid)
                     else:
-                        tids_item_c = frequnet_items_c[item_c]
+                        tids_item_c = frequent_items_c[item_c]
                         # if "c" was seen before but there is not enough sequences left to be scanned
                         # to allow IU{c} --> J to reach the minimum support threshold
                         if len(tids_item_c) + left < self.min_supp_relative:
-                            tids_item_c.remove(item_c)
+                            try:
+                                frequent_items_c[item_c].remove(item_c)
+                            except KeyError:
+                                pass
                             break # continue itemloop TODO
-                        
-                        # add the current tid to the tidset of "c"
-                        tids_item_c.add(tid)
+                    
+                    if item_c not in frequent_items_c.keys():
+                        # otherwise, if we did not see "c" yet, create a new tidset for "c"
+                        tids_item_c = set()
+                        frequent_items_c[item_c] = tids_item_c
+
+                    # add the current tid to the tidset of "c"
+                    frequent_items_c[item_c].add(tid)
             left -= 1
         
         # for each item c found, we create a rule IU{c} ==> J
-        for item_c, tids_ic_j in frequnet_items_c.items():
+        for item_c, tids_ic_j in frequent_items_c.items():
             if len(tids_ic_j) >= self.min_supp_relative:
                 # Calculate tids containing IU{c} which is necessary
                 # to calculate the confidence
@@ -509,24 +510,24 @@ class ALgorithmTNS(object):
                     if item_c not in frequent_items_c.keys():
                         if left < self.min_supp_relative:
                             break # continue itemloop TODO
-                        
-                        # otherwise, if we did not see "c" yet, create a new tidset for "c"
-                        tids_item_c = set()
-                        frequent_items_c[item_c] = tids_item_c
-
-                        # add the current tid to the tidset of "c"
-                        tids_item_c.add(tid)
                     else:
                         tids_item_c = frequent_items_c[item_c]
                         # if "c" was seen before but there is not enough sequences left to be scanned
                         # to allow I --> J U{c} to reach the minimum support threshold
                         # remove 'c' and continue the loop of items
                         if len(tids_item_c) + left < self.min_supp_relative:
-                            tids_item_c.remove(item_c)
+                            try:
+                                frequent_items_c[item_c].remove(item_c)
+                            except KeyError:
+                                pass
                             break # continue itemloop TODO
-                        
-                        # add the current tid to the tidset of "c"
-                        tids_item_c.add(tid)
+                    if item_c not in frequent_items_c:
+                        # otherwise, if we did not see "c" yet, create a new tidset for "c"
+                        tids_item_c = set()
+                        frequent_items_c[item_c] = tids_item_c
+ 
+                    # add the current tid to the tidset of "c"
+                    frequent_items_c[item_c].add(tid)
             left -= 1
         
         # for each item c found, we create a rule I ==> JU{c}

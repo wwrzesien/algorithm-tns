@@ -2,14 +2,18 @@ import pickle
 import logging
 import tweepy
 
-log = logging.getLogger("twitter")
-log.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.NOTSET)
+# log = logging.getLogger("twitter")
+# log.setLevel(logging.DEBUG)
+# ch = logging.StreamHandler()
+# ch.setLevel(logging.NOTSET)
 
-formatter = logging.Formatter('%(message)s')
-ch.setFormatter(formatter)
-log.addHandler(ch)
+# formatter = logging.Formatter('%(message)s')
+# ch.setFormatter(formatter)
+# log.addHandler(ch)
+
+log = logging.getLogger("tns")
+log.setLevel(logging.DEBUG)
+log.propagate = False
 
 # Twitter API credentials
 CONSUMER_KEY = "SOmoMXIHBGv1af7MSJ2ws2cag"
@@ -22,8 +26,10 @@ class TwitterDatabase(object):
         self.hashtag = hashtag
         self.tweets_num = tweets_num
         self.map_to_words = {}
-        self.database_int = []
+        self.database = []
         self.database_words = []
+        self.min_item = 1
+        self.max_item = 1
     
     def retrieve_tweets(self):
         """Call Twitter API, create words database"""
@@ -40,26 +46,28 @@ class TwitterDatabase(object):
         self.database_words = [tweet.full_text.lower().split() for tweet in tweets]
 
         log.debug(self.database_words[0])
-        self.save_pickle(self.database_words, "data_words.pickle")
+        save = {'data': self.database_words, 'min_item': self.min_item, 'max_item': self.max_item}
+        self.save_pickle(save, "data_words.pickle")
 
     def mapping(self):
         """Create map int-word and int database"""
-        word_id = 1
         temp = {}
         for seq in self.database_words:
             seq_new = []
             for word in seq:
-                if "@" in word:
+                if "@" in word or (word is seq[-1] and '...' in word):
                     continue
-                if word not in self.map_to_words.values():
-                    self.map_to_words[word_id] = word
-                    temp[word] = word_id
-                seq_new.append([temp[word]])
-                word_id += 1
-            self.database_int.append(seq_new)
 
-        log.debug(self.database_int[0])
-        self.save_pickle(self.database_int, "data_int.pickle")
+                if word not in self.map_to_words.values():
+                    self.map_to_words[self.max_item] = word
+                    temp[word] = self.max_item
+                seq_new.append([temp[word]])
+                self.max_item += 1
+            self.database.append(seq_new)
+
+        log.debug(self.database[0])
+        save = {'data': self.database, 'min_item': self.min_item, 'max_item': self.max_item}
+        self.save_pickle(save, "data_int.pickle")
     
     def print_stats(self, results):
         """Display final stats"""
@@ -82,16 +90,20 @@ class TwitterDatabase(object):
         """Load data from pickle"""
         with open(filename, "rb") as file:
             data = pickle.load(file)
-        return data
+        self.min_item = data['min_item']
+        self.max_item = data['max_item']
+        if 'int' in filename:
+            self.database = data['data']
+        else:
+            self.database_words = data['data']
 
 if __name__ == "__main__":
     twr = TwitterDatabase("covid", 100)
     # twr.retrieve_tweets()
-    # tweets = twr.load_pickle("./data_words.pickle")
-    # # print(tweets[0])
-    # twr.database_words = tweets
-    # twr.mapping()
-    # print(twr.database_int)
+    twr.load_pickle("./data_words.pickle", twr.database_words)
+    print(twr.database_words)
+    twr.mapping()
+    # print(twr.database)
 
 
 
