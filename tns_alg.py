@@ -5,6 +5,7 @@ https://www.philippe-fournier-viger.com/spmf/TopKNonRedundantSequentialRules.php
 import logging
 from rbt import RedBlackTree
 from rule import Rule
+from db import Database
 
 log = logging.getLogger("tns")
 log.setLevel(logging.DEBUG)
@@ -31,8 +32,8 @@ class ALgorithmTNS(object):
         self.total_removed_count = None
         self.not_added = None
 
-        self.k_rules = RedBlackTree()
-        self.candidates = RedBlackTree()
+        self.k_rules = Database()
+        self.candidates = Database()
 
     def run_algorithm(self):
         "Main method"
@@ -191,24 +192,24 @@ class ALgorithmTNS(object):
                 if flag:
                     sup_ij = len(tids_ij)
                     # if the rule I ==> J is frequent
-                    print(sup_ij)
+                    # print(sup_ij)
                     if sup_ij >= self.min_supp_relative:
                         # create the rule
                         conf_ij = len(tids_ij) / len(occurrences_i_first)
                         
                         rule_ij = Rule()
                         rule_ij.rule([item_i], [item_j], conf_ij, sup_ij, tids_i, tids_j, tids_ij, occurrences_i_first, occurrences_j_last)
-                        print(rule_ij.itemset1)
+                        # print(rule_ij.itemset1)
                         # if the rule is valid
                         if conf_ij >= self.min_conf:
                             # save the rule to current top k list
-                            print('przed save1')
+                            # print('przed save1')
                             self.save(rule_ij, sup_ij)
-                            print('po save1')
+                            # print('po save1')
 
                         # register the rule as candidate for the future left and right expansions
                         self.register_as_candidate(True, rule_ij)
-                        print('po register1')
+                        # print('po register1')
 
                     sup_ji = len(tids_ji)
                     # if the rule J ==> I is frequent
@@ -223,24 +224,25 @@ class ALgorithmTNS(object):
                         if conf_ji >= self.min_conf:
                             # save the rule to the current top k list
                             self.save(rule_ji, sup_ji)
-                            print('po save2')
+                            # print('po save2')
                         
                         # register the rule as candidate for the future left and right expansions
                         self.register_as_candidate(True, rule_ji)
-                        print('po register2')
-        print('przed while')
+                        # print('po register2')
+        # print('przed while')
         # Now we have finished checking all the rules containing 1 item
 	    # in the left side and 1 in the right side,
 	    # the next step is to recursively expand rules in the set 
 	    # "candidates" to find more rules.
         print('K-rules drzewo')
-        self.k_rules.pre_order(self.k_rules.root)
+        self.k_rules.pre_order()
         print("candidates drzewo")
-        self.candidates.pre_order(self.candidates.root)
+        self.candidates.pre_order()
+        # return
         while not self.candidates.is_empty():
-            print(self.candidates.size)
-            print("candidates drzewo")
-            self.candidates.pre_order(self.candidates.root)
+            # print(self.candidates.size)
+            # print("candidates drzewo")
+            # self.candidates.pre_order(self.candidates.root)
             #  take the rule with the highest support first
             rule = self.candidates.pop_maximum()
             if rule.get_absolute_support() < self.min_supp_relative:
@@ -253,7 +255,7 @@ class ALgorithmTNS(object):
                 # If the rule should only be expanded by left side to
 				# avoid generating redundant rules, then we 
 				# only expand the left side.
-                expand_l(rule)
+                self.expand_l(rule)
 
 
     def save(self, rule, support):
@@ -263,7 +265,7 @@ class ALgorithmTNS(object):
         # rule having support jus lower than support + 1
         tmp_node = Rule()
         tmp_node.rule(None, None, 0, support+1, None, None, None, None, None)
-        lower_rule_node = self.k_rules.lower_node(tmp_node)
+        lower_rule_nodes = self.k_rules.lower_node(tmp_node)
 
         # print("info o drzewie")
         # if self.k_rules.size > 0:
@@ -276,31 +278,36 @@ class ALgorithmTNS(object):
 
         # applying strategy 1 and strategy 2
         rules_to_delete = set()
+        visited_node = []
+        for lower_rule_node in lower_rule_nodes:
+                # for each rule "lower_rule_node" having the same support as the rule received as parameter
+            # while lower_rule_node is not None and lower_rule_node.item is not None and lower_rule_node not in visited_node and lower_rule_node.item.get_absolute_support() == support:
+            if lower_rule_node is not None and lower_rule_node.get_absolute_support() == support:
+                # if lower_rule_node.left.item is None and lower_rule_node.right.item is None:
+                #     visited_node.append(lower_rule_node)
 
-        # for each rule "lower_rule_node" having the same support as the rule received as parameter
-        while lower_rule_node is not None and lower_rule_node.item is not None and lower_rule_node.item.get_absolute_support() == support:
-            print('while w save')
-            # Strategy 1:
-            # if the confidence is the same and the rule "lower_rule_node" subsume the new rule
-            # then we dont add the new rule
-            # print(rule.confidence)
-            # print(lower_rule_node.item.confidence)
-            # print(self.subsume(lower_rule_node.item, rule))
-            if rule.confidence == lower_rule_node.item.confidence and self.subsume(lower_rule_node.item, rule):
-                self.not_added += 1
-                return
+                # print('while w save')
+                # Strategy 1:
+                # if the confidence is the same and the rule "lower_rule_node" subsume the new rule
+                # then we dont add the new rule
+                # print(rule.confidence)
+                # print(lower_rule_node.item.confidence)
+                # print(self.subsume(lower_rule_node.item, rule))
+                if rule.confidence == lower_rule_node.confidence and self.subsume(lower_rule_node, rule):
+                    self.not_added += 1
+                    return
 
-            # Strategy 2:
-            # if the confidence is the same and the rule "lower_rule_node" subsume the new rule
-            # then we dont add the new rule
-            if rule.confidence == lower_rule_node.item.confidence and self.subsume(rule, lower_rule_node.item):
-                # add rule to the set of rules to be deleted
-                rules_to_delete.add(lower_rule_node.item)
-                self.total_removed_count += 1
-            
-            # check the next rule
-            lower_rule_node = self.k_rules.lower_node(lower_rule_node.item)
-            # print(lower_rule_node.item.print_stats())
+                # Strategy 2:
+                # if the confidence is the same and the rule "lower_rule_node" subsume the new rule
+                # then we dont add the new rule
+                if rule.confidence == lower_rule_node.confidence and self.subsume(rule, lower_rule_node):
+                    # add rule to the set of rules to be deleted
+                    rules_to_delete.add(lower_rule_node)
+                    self.total_removed_count += 1
+                
+                # check the next rule
+                # lower_rule_node = self.k_rules.lower_node(lower_rule_node.item)
+                # print(lower_rule_node.item.print_stats())
         
         # delete rules to be deleted
         for r in rules_to_delete:
@@ -320,13 +327,17 @@ class ALgorithmTNS(object):
                 tmp_rule = Rule()
                 tmp_rule.rule(None, None, 0, self.min_supp_relative+1, None, None, None, None, None)
                 
-                i = 0
-                while self.k_rules.size > self.k or i == 0:
-                    i = 1
-                    lower = self.k_rules.lower_node(tmp_rule)
-                    if lower == None:
+                # i = 0
+                # while self.k_rules.size > self.k or i == 0:
+                #     i = 1
+                lower = self.k_rules.lower_node(tmp_rule)
+                # if lower == None:
+                #     break
+                for l in lower:
+                    if self.k_rules.size > self.k:
+                        self.k_rules.remove(lower)
+                    else:
                         break
-                    self.k_rules.remove(lower.item)
             
             # set the minimum support to the support of the rule having
             # the lowest support
@@ -350,18 +361,20 @@ class ALgorithmTNS(object):
         # loop1:
         for item2 in array2:
             # for each item in the second itemset
-            for item1 in array1:
-                # if the current item in itemset is equal to the one in itemset2
-                # search for the next one in itemset1
-                if item2 == item1:
-                    count += 1
-                    break
-                    # continue loop1
-                # if the current tem in itemset is larger
-                # than the current item in itemset2, then 
-                # stop because of the lexical order
-                elif item1 > item2:
-                    return False
+            # for item1 in array1:
+            #     # if the current item in itemset is equal to the one in itemset2
+            #     # search for the next one in itemset1
+            #     if item2 == item1:
+            #         count += 1
+            #         break
+            #         # continue loop1
+            #     # if the current tem in itemset is larger
+            #     # than the current item in itemset2, then 
+            #     # stop because of the lexical order
+            #     elif item1 > item2:
+            #         return False
+            if item2 in array1:
+                count += 1
 
         if count != len(array2):
             # means that an item was not found
@@ -466,15 +479,11 @@ class ALgorithmTNS(object):
                 if conf_ic_j >= self.min_conf:
                     # save the rule
                     self.save(candidate, len(tids_ic_j))
+                self.register_as_candidate(False, candidate)
 
     def containsLEX(self, itemset, item):
         """This method checks if the item "item" is in the itemset."""
-        for itm in itemset:
-            if itm == item:
-                return True
-            elif itm > item:
-                return True
-        return False
+        return item in itemset
 
     def expand_r(self, rule):
         """This method search for items for expanding right side of a rule I --> J 
@@ -580,7 +589,7 @@ class ALgorithmTNS(object):
         log.info("Rules eliminated by strategy2: {}".format(self.total_removed_count))
 
         if self.k_rules.size > 0:
-            self.k_rules.pre_order(self.k_rules.root)
+            self.k_rules.pre_order()
 
 
     def clean_result(self):
@@ -605,21 +614,28 @@ if __name__ == "__main__":
             self.database = TEST_DB
             self.min_item = 1
             self.max_item = 7
+    
+    db = Database()
+    db2 = Database()
+    
+    print(db.__repr__)
+    print(db2.__repr__)
+    print(db.__repr__ - db2.__repr__)
             
-    tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=Database())
+    # tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=Database())
 
-    # tns.run_algorithm()
+    # # tns.run_algorithm()
 
-    class t():
-        def __init__(self, itemset1, itemset2):
-            self.itemset1 = itemset1
-            self.itemset2 = itemset2
+    # class t():
+    #     def __init__(self, itemset1, itemset2):
+    #         self.itemset1 = itemset1
+    #         self.itemset2 = itemset2
 
-    a = t([1], [2,3,4])
-    b = t([1], [2,3,4,6])
+    # a = t([1], [2,3,4])
+    # b = t([1], [2,3,4,6])
 
-    print(tns.subsume(a, b))
-    print(tns.subsume(b, a))
+    # print(tns.subsume(a, b))
+    # print(tns.subsume(b, a))
 
     # print(tns.contains_or_equals([1,2,3], [2,3, 6]))
 
