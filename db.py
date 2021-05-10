@@ -46,32 +46,22 @@ class Database(object):
             self.min_rule = None
         else:
             self.min_rule = self.db[0]
-
             for rule in self.db:
                 if rule.compare(self.min_rule) < 0:
                     self.min_rule = rule
-
-        
         return v
 
     def pop_maximum(self):
         v = self.max_rule
-        # print(self.max_rule.print_stats())
-        # print(self.max_rule)
-        # print(self.max_rule in self.db)
-        # print(self.db[0])
-        # print(self.db[0].print_stats())
         self.db.remove(self.max_rule)
         self.size -= 1
         if len(self.db) == 0:
             self.max_rule = None
         else:
             self.max_rule = self.db[0]
-
             for rule in self.db:
                 if rule.compare(self.max_rule) > 0:
                     self.max_rule = rule
-
         return v
 
     def lower_node(self, rule):
