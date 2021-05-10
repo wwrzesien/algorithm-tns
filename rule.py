@@ -68,7 +68,6 @@ class Rule(object):
     def print_stats(self):
         string = "{} #SUP: {} #CONF: {}".format(self.to_string(), self.get_absolute_support(), self.confidence)
         log.info(string)
-        # print(string)
 
     def compare(self, o):
         """Compare rules, 0 if equal, 0< if smaller, >0 if larger"""
