@@ -1,6 +1,6 @@
 import logging
 import tweepy
-from erminer_alg import AlgorithmERMiner
+from ERMiner.erminer_alg import AlgorithmERMiner
 # from twitter import TwitterDatabase
 
 # Create logger
@@ -30,6 +30,8 @@ TEST_DB = [
 if __name__ == "__main__":
     log.info("Start ERMiner algorithm")
 
+    min_supp = 3
+    min_conf = 5
     class Database(object):
         def __init__(self, *args):
             self.database = TEST_DB
@@ -38,5 +40,7 @@ if __name__ == "__main__":
 
     db = Database()
 
-    erminer = AlgorithmERMiner(database=db)
+    erminer = AlgorithmERMiner(database=db, min_conf=min_conf, min_supp=min_supp)
+
+    # erminer.calc_tidset_ij_and_ji({}, 3, ["d"], {1})
 
