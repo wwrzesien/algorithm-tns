@@ -1,5 +1,6 @@
 import logging
 import tweepy
+import time
 
 from ERMiner.erminer_alg import AlgorithmERMiner
 
@@ -12,7 +13,7 @@ log.propagate = False
 
 # Create console handler
 ch = logging.StreamHandler()
-fh = logging.FileHandler('./logs.log', 'w')
+fh = logging.FileHandler('./logs_erminer.log', 'w')
 ch.setLevel(logging.DEBUG)
 fh.setLevel(logging.DEBUG)
 
@@ -29,29 +30,36 @@ TEST_DB = [
     [[5], [7], [1,6], [3], [2], [3]]
 ]
 
+class Database(object):
+    def __init__(self, *args):
+        self.database = TEST_DB
+        self.min_item = 1
+        self.max_item = 7
+
+
 if __name__ == "__main__":
     log.info("Start ERMiner algorithm")
 
     min_supp = 15
     min_conf = 0.5
-    class Database(object):
-        def __init__(self, *args):
-            self.database = TEST_DB
-            self.min_item = 1
-            self.max_item = 7
 
+    # test database
     # twr = Database()
 
+    # analitical database
     twr = TwitterDatabase('photography', 1000)
-    # twr.retrieve_tweets()
-    twr.load_pickle("./data_words.pickle")
+    # twr.retrieve_tweets("data_words_1000.pickle")
+    twr.load_pickle("./data_words_1000.pickle")
     twr.mapping()
     # twr.load_pickle("./data_int.pickle")
     # twr.save_pickle(twr.map_to_words, "./map_to_words.pickle")
 
     erminer = AlgorithmERMiner(database=twr, min_conf=min_conf, min_supp=min_supp)
 
+    start_time = time.time()
     erminer.run_algorithm()
+    log.info("Execution time: {}s".format(round(time.time() - start_time, 4)))
+
     results = erminer.get_results()
 
     log.info("")

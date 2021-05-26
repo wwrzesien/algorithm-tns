@@ -7,7 +7,6 @@ import math
 from typing import List, Set, Dict
 
 from ERMiner.expand_left_store import ExpandLeftStore
-from ERMiner.sparse_matrix import SparseMatrix
 from ERMiner.left_equivalence import LeftEquivalence, LeftRule
 from ERMiner.right_equivalence import RightEquivalence, RightRule
 
@@ -30,7 +29,7 @@ class AlgorithmERMiner(object):
         self.min_supp_relative = min_supp 
         self.map_item_count = {} # {item: {tid: {first_itemset: , last_itemset: }}}
         self.store = ExpandLeftStore()
-        self.matrix = {} #SparseMatrix()
+        self.matrix = {}
         self.total_candidate_count = 0
         self.candidate_prune_count = 0
 

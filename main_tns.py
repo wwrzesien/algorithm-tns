@@ -1,6 +1,8 @@
 import logging
 import tweepy
-from tns_alg import ALgorithmTNS
+
+from TNS.tns_alg import ALgorithmTNS
+
 from twitter import TwitterDatabase
 
 # Create logger
@@ -40,20 +42,20 @@ if __name__ == "__main__":
             self.min_item = 1
             self.max_item = 7
     
-    # twr = Database()
+    twr = Database()
 
-    twr = TwitterDatabase('photography', 100)
-    twr.retrieve_tweets()
+    # twr = TwitterDatabase('photography', 50)
+    # twr.retrieve_tweets()
     # twr.load_pickle("./data_words.pickle", twr.database_words)
-    twr.mapping()
+    # twr.mapping()
     # twr.load_pickle("./data_int.pickle")
     # twr.save_pickle(twr.map_to_words, "./map_to_words.pickle")
-    # print(1 in twr.database)
             
     tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=twr)
 
     tns.run_algorithm()
-    result = tns.print_stats()
-    twr.print_stats(result)
+    # result = tns.print_stats()
+    tns.print_stats()
+    # twr.print_stats(result)
 
     

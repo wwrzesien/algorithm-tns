@@ -519,20 +519,21 @@ class ALgorithmTNS(object):
         log.info("--------TNS - stats----------")
         log.info("Minsup: {}".format(self.min_supp_relative))
         log.info("Rules count: {}".format(self.k_rules.size))
-        log.info("Max candidates: {}".format(self.max_candidate_count))
-        log.info("Sequential rules count: {}".format(self.k_rules.size))
-        log.info("Rules eliminated by strategy1: {}".format(self.not_added))
-        log.info("Rules eliminated by strategy2: {}".format(self.total_removed_count))
+        # log.info("Max candidates: {}".format(self.max_candidate_count))
+        # log.info("Sequential rules count: {}".format(self.k_rules.size))
+        # log.info("Rules eliminated by strategy1: {}".format(self.not_added))
+        # log.info("Rules eliminated by strategy2: {}".format(self.total_removed_count))
 
         save = []
         for rule in self.k_rules.db:
-            s = {}
-            s["i"] = rule.itemset1
-            s["j"] = rule.itemset2
-            s["sup"] = rule.get_absolute_support()
-            s["conf"] = rule.confidence
-            save.append(s)
-        return save
+            rule.print_stats()
+        #     s = {}
+        #     s["i"] = rule.itemset1
+        #     s["j"] = rule.itemset2
+        #     s["sup"] = rule.get_absolute_support()
+        #     s["conf"] = rule.confidence
+        #     save.append(s)
+        # return save
 
 
     def clean_result(self):
