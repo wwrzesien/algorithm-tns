@@ -1,4 +1,4 @@
-from rule import Rule
+from TNS.rule import Rule
 import copy
 
 class Database(object):

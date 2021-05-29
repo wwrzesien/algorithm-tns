@@ -3,7 +3,7 @@ Implementation of Red-Black Tree
 https://www.programiz.com/dsa/red-black-tree
 """
 
-from rule import Rule
+from TNS.rule import Rule
 
 
 class Node(object):

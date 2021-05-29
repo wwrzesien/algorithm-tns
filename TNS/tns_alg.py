@@ -3,9 +3,9 @@ Implementation based on
 https://www.philippe-fournier-viger.com/spmf/TopKNonRedundantSequentialRules.php
 """
 import logging
-from rbt import RedBlackTree
-from rule import Rule
-from db import Database
+from TNS.rbt import RedBlackTree
+from TNS.rule import Rule
+from TNS.db import Database
 
 log = logging.getLogger("tns")
 log.setLevel(logging.DEBUG)
