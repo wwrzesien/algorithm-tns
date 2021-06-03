@@ -3,7 +3,7 @@ Implementation of Red-Black Tree
 https://www.programiz.com/dsa/red-black-tree
 """
 
-from rule import Rule
+from TNS.rule import Rule
 
 
 class Node(object):
@@ -107,8 +107,6 @@ class RedBlackTree(Rule):
 
     def fix_insert(self, k):
         """Balance the tree after insertion"""
-        # print('node.parent z rule')
-        # print(type(k.parent))
         while k.parent.color == 1:
             # if k.parent.item.equals(k.parent.parent.left.item):
             if k.parent == k.parent.parent.left:
@@ -307,7 +305,6 @@ class RedBlackTree(Rule):
     def lower_node(self, k):
         """Return the node having the largest element having a value lower than a given element k"""
         x = self.root
-        # print(self.root.item)
         while x != self.TNULL:
             if k.compare(x.item) > 0:
                 if x.right != self.TNULL:
@@ -379,42 +376,7 @@ if __name__ == "__main__":
 
     rule1 = Rule()
     rule1.rule([1], [2], 4, 6, "w", "w", "d", "v", 7)
-    rule2 = Rule()
-    rule2.rule([3], [2, 6], 6, 8, None, None, None, None, 8)
-    rule3 = Rule()
-    rule3.rule([3], [2, 6], 6, 8, None, None, None, None, 8)
-    # bst.add(rule1)
-    bst.add(rule2)
-    bst.add(rule3)
-    # bst.add(rule2)
-
-    print(bst.is_empty())
-    bst.pre_order(bst.root)
-    # print(bst.root.item.print_stats())
-    # print(bst.root.parent)
-    # print(bst.root.left.item)
-    # print(bst.minimum().print_stats())
-    # print(bst.maximum().print_stats())
-
-    # x = bst.pop_maximum()
-    # print(x)
-    # print(x.confidence)
-    # print(rule2)
-    # bst.pre_order(bst.root)
-
-    # d = bst.lower_node(rule2)
-    # print(d.item.print_stats())
-
-    # print(bst.is_empty())
-    # bst.add(10)
-
-    # x = bst.pop_minimum()
-    # print(x)
-    # y = bst.pop_minimum()
-    # print(y)
-
-    # print(bst.is_empty())
-    # print(x.item)
+    bst.add(rule1)
 
 
         

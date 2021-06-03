@@ -1,6 +1,9 @@
 import logging
 import tweepy
-from tns_alg import ALgorithmTNS
+import time
+
+from TNS.tns_alg import ALgorithmTNS
+
 from twitter import TwitterDatabase
 
 # Create logger
@@ -20,28 +23,19 @@ fh.setFormatter(formatter)
 log.addHandler(ch)
 log.addHandler(fh)
 
-# Seguence db -> list of sequences, 
-# Sequence -> list of itemsets
-# Itemset -> list of elements (integers/words)
 TEST_DB = [
-    ([1], [1,2,3], [1,3], [4], [3,6]),
-    ([1,4], [3], [2,3], [1,5]),
-    ([5,6], [1,2], [4,6], [3], [2]),
-    ([5], [7], [1,6], [3], [2], [3])
+    [[1], [1,2,3], [1,3], [4], [3,6]],
+    [[1,4], [3], [2,3], [1,5]],
+    [[5,6], [1,2], [4,6], [3], [2]],
+    [[5], [7], [1,6], [3], [2], [3]]
 ]
-# TEST_DB = [
-#     ([1], [1,2,3], [1,3], [4], [3,6]),
-#     ([1], [1,2,3], [1,3], [4], [3,6])
-# ]
 
 if __name__ == "__main__":
     log.info("Start TNS algorithm")
 
     k = 30
     min_conf = 0.5
-    delta = 2
-
-    # log.debug(TEST_DB)
+    delta = 2000
 
     class Database(object):
         def __init__(self, *args):
@@ -51,18 +45,21 @@ if __name__ == "__main__":
     
     twr = Database()
 
-    # twr = TwitterDatabase('covid', 100)
+    # twr = TwitterDatabase('photography', 50)
     # twr.retrieve_tweets()
-    # twr.load_pickle("./data_words.pickle", twr.database_words)
-    # twr.mapping()
+    # twr.load_pickle("./data/data_words_500.pickle")
+    # twr.mapping("./map_to_words.pickle")
     # twr.load_pickle("./data_int.pickle")
-    # print(twr.database)
-    # print(1 in twr.database)
-            
+    # twr.save_pickle(twr.map_to_words, "./map_to_words.pickle")
+
     tns = ALgorithmTNS(k=k, min_conf=min_conf, delta=delta, database=twr)
 
+    start_time = time.time()
     tns.run_algorithm()
+    log.info("Execution time: {}s".format(round(time.time() - start_time, 4)))
 
-    tns.print_stats()
+    # result = tns.print_stats()
+    # tns.print_stats()
+    # twr.print_stats(result)
 
     
