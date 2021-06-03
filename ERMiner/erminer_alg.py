@@ -38,6 +38,9 @@ class AlgorithmERMiner(object):
     def run_algorithm(self):
         """Main method"""
         log.info("Run algorithm")
+        self.total_candidate_count = 0
+        self.candidate_prune_count = 0
+        
         if self.min_supp_relative == 0:
             self.min_supp_relative = 1
         
@@ -363,6 +366,7 @@ class AlgorithmERMiner(object):
         log.info("------- ERMiner stats --------")
         log.info("Minsup: {}".format(self.min_support))
         log.info("Sequential rules count: {}".format(len(self.rules)))
+
         log.info("")
         for r in self.rules:
             rule = '{} ==> {} #SUP: {} #CONF: {}'.format(r["i"], r["j"], r["sup"], r["conf"])
@@ -370,7 +374,8 @@ class AlgorithmERMiner(object):
 
     def get_results(self):
         """Return results in dict form: {"i": , "j": , "sup": , "conf": }"""
-        return self.rules
+        prune_index = self.candidate_prune_count / self.total_candidate_count
+        return self.rules, prune_index
 
 if __name__ == "__main__":
     pass

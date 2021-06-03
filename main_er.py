@@ -42,12 +42,18 @@ def test_algorithm(min_conf):
     files = {"1000": "data_words_1000.pickle", "1500": "data_words_1500.pickle", "3000": "data_words_3000.pickle", "comb": "data_words_combined.pickle"}
     min_supp = [1, 5, 10, 15, 20]
 
-    r = {"comb": [], "1000": [], "1500": [], "3000": [], "supp": min_supp}
+    r = {
+            "comb": {"time":[], "prune": []}, 
+            "1000": {"time":[], "prune": []},
+            "1500": {"time":[], "prune": []},
+            "3000": {"time":[], "prune": []},
+            "supp": min_supp
+        }
 
-    twr = TwitterDatabase('photography', 300)
     for key, file in files.items():
         for supp in min_supp:
-            twr.load_pickle("./" + file)
+            twr = TwitterDatabase('photography', 300)
+            twr.load_pickle("./data/" + file)
             twr.mapping("data_int.pickle")
 
             erminer = AlgorithmERMiner(database=twr, min_conf=min_conf, min_supp=supp)
@@ -57,16 +63,18 @@ def test_algorithm(min_conf):
             exec_time = round(time.time() - start_time, 4)
             log.info("Execution time: {}s".format(exec_time))
             
-            results = erminer.get_results()
+            results, prune_index = erminer.get_results()
 
             log.info("")
             log.info("------- ERMiner stats --------")
             log.info("Minsup: {}".format(supp))
             log.info("Sequential rules count: {}".format(len(results)))
+            log.info("Prune: {}".format(prune_index))
             log.info("")
             
             twr.print_stats(results)
-            r[key].append(exec_time)
+            r[key]["time"].append(exec_time)
+            r[key]["prune"].append(prune_index)
 
 
     with open("results.pickle", 'wb') as file:
@@ -78,7 +86,7 @@ def combine_datasets():
     twr = TwitterDatabase('photography', 300)
     combine_db = []
     for file in files:
-        twr.load_pickle("./" + file)
+        twr.load_pickle("./data/" + file)
         combine_db += twr.database_words
     twr.database_words = combine_db
     save = {'data': twr.database_words, 'min_item': twr.min_item, 'max_item': twr.max_item, 'mapping':twr.map_to_words, "stats": twr.stats}
@@ -87,7 +95,7 @@ def combine_datasets():
 if __name__ == "__main__":
     log.info("Start ERMiner algorithm")
 
-    min_supp = 15
+    min_supp = 1
     min_conf = 0.5
 
     # combine_datasets()
@@ -98,8 +106,8 @@ if __name__ == "__main__":
 
     # analitical database
     # twr = TwitterDatabase('photography', 3000)
-    # twr.retrieve_tweets("data_words_3000.pickle")
-    # twr.load_pickle("./data_words_1000.pickle")
+    # twr.retrieve_tweets("data/data_words_3000.pickle")
+    # twr.load_pickle("./data/data_words_1000.pickle")
     # twr.mapping()
     # # twr.load_pickle("./data_int.pickle")
     # # twr.save_pickle(twr.map_to_words, "./map_to_words.pickle")

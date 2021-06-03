@@ -220,10 +220,10 @@ class ALgorithmTNS(object):
 	    # in the left side and 1 in the right side,
 	    # the next step is to recursively expand rules in the set 
 	    # "candidates" to find more rules.
-        print('K-rules drzewo')
-        self.k_rules.pre_order()
-        print("candidates drzewo")
-        self.candidates.pre_order()
+        # print('K-rules drzewo')
+        # self.k_rules.pre_order()
+        # print("candidates drzewo")
+        # self.candidates.pre_order()
         while not self.candidates.is_empty():
             #  take the rule with the highest support first
             rule = self.candidates.pop_maximum()
