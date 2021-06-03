@@ -43,7 +43,7 @@ if __name__ == "__main__":
             self.min_item = 1
             self.max_item = 7
     
-    # twr = Database()
+    twr = Database()
 
     # twr = TwitterDatabase('photography', 50)
     # twr.retrieve_tweets()
